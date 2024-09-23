@@ -1,8 +1,6 @@
-
-
 import React from 'react';
 
-const CurrencyRow = ({ currency, exchangeRate, buyRate, sellRate   }) => {
+const CurrencyRow = ({ currency, buyRate, exchangeRate, sellRate }) => {
   return (
     <tr className="bg-orange-50">
       <td className="border px-4 py-2">{currency}</td>
@@ -13,6 +11,7 @@ const CurrencyRow = ({ currency, exchangeRate, buyRate, sellRate   }) => {
   );
 };
 
-
 export default CurrencyRow;
+
+
 

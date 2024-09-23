@@ -1,27 +1,32 @@
-
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CurrencyRow from "./CurrencyRow";
 
 function CurrencyTable() {
-  const currencies = [
-    { code: "CAD", exchangeRate: "1.2345", buyRate: "1.26", sellRate: "1.20" },
-    {
-      code: "IDR",
-      exchangeRate: "0.00007",
-      buyRate: "0.00008",
-      sellRate: "0.00006",
-    },
-    {
-      code: "JPY",
-      exchangeRate: "0.0091",
-      buyRate: "0.0093",
-      sellRate: "0.0089",
-    },
-    { code: "CHF", exchangeRate: "1.1000", buyRate: "1.12", sellRate: "1.08" },
-    { code: "EUR", exchangeRate: "1.1000", buyRate: "1.12", sellRate: "1.08" },
-    { code: "GBP", exchangeRate: "1.3000", buyRate: "1.32", sellRate: "1.28" },
-  ];
+  const [rates, setRates] = useState({});
+  const currencies = ["CAD", "IDR", "JPY", "CHF", "EUR", "GBP"];
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const apiKey = import.meta.env.VITE_API_KEY; 
+        const response = await fetch(
+          `https://api.currencyfreaks.com/latest?apikey=${apiKey}`
+        );
+        const data = await response.json();
+        setRates(data.rates);
+      } catch (error) {
+        console.error("Error fetching the exchange rates:", error);
+      }
+    };
+
+    fetchRates();
+  }, []);
+
+  const calculateBuySellRates = (rate) => {
+    const buyRate = (rate * 1.02).toFixed(4);
+    const sellRate = (rate * 0.98).toFixed(4);
+    return { buyRate, sellRate };
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-orange-100">
@@ -36,15 +41,21 @@ function CurrencyTable() {
             </tr>
           </thead>
           <tbody>
-            {currencies.map(({ code, exchangeRate, buyRate, sellRate }) => (
-              <CurrencyRow
-                key={code}
-                currency={code}
-                exchangeRate={exchangeRate}
-                buyRate={buyRate}
-                sellRate={sellRate}
-              />
-            ))}
+            {currencies.map((currency) => {
+              const rate = rates[currency];
+              if (!rate) return null;
+              const { buyRate, sellRate } = calculateBuySellRates(rate);
+
+              return (
+                <CurrencyRow
+                  key={currency}
+                  currency={currency}
+                  buyRate={buyRate}
+                  exchangeRate={parseFloat(rate).toFixed(4)}
+                  sellRate={sellRate}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
